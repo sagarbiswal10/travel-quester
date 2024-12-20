@@ -1,5 +1,6 @@
 import { useLocation } from 'react-router-dom';
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Navbar } from '@/components/Navbar';
 
 // Dummy data for different types
 const dummyData = {
@@ -29,7 +30,7 @@ const SearchResults = () => {
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const type = searchParams.get('type') as keyof typeof dummyData || 'flights';
-  const results = dummyData[type];
+  const results = dummyData[type] || [];
 
   const renderResult = (item: any) => {
     if (type === 'hotels') {
@@ -65,10 +66,13 @@ const SearchResults = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-6">Search Results</h1>
-      <div className="grid gap-4">
-        {results.map(renderResult)}
+    <div className="min-h-screen bg-gray-50">
+      <Navbar />
+      <div className="container mx-auto px-4 py-8">
+        <h1 className="text-3xl font-bold mb-6">Search Results</h1>
+        <div className="grid gap-4">
+          {results.map(renderResult)}
+        </div>
       </div>
     </div>
   );
