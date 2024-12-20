@@ -21,6 +21,8 @@ const App = () => (
           <Route path="/buses" element={<Index />} />
           <Route path="/hotels" element={<Index />} />
           <Route path="/search" element={<SearchResults />} />
+          <Route path="/bookings" element={<Index />} />
+          <Route path="/wishlist" element={<Index />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
