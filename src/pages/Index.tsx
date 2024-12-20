@@ -1,18 +1,24 @@
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { SearchBox } from '@/components/SearchBox';
 import { TravelTabs } from '@/components/TravelTabs';
 
 const Index = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const currentType = location.pathname.slice(1) || 'flights';
 
   const handleSearch = (searchData: any) => {
     const queryParams = new URLSearchParams({
+      type: searchData.type,
       from: searchData.from,
-      to: searchData.to,
+      to: searchData.to || '',
       date: searchData.date?.toISOString() || '',
+      returnDate: searchData.returnDate?.toISOString() || '',
+      passengers: searchData.passengers || '1',
+      roomType: searchData.roomType || '',
     }).toString();
     
-    navigate(`${searchData.type}/search?${queryParams}`);
+    navigate(`/search?${queryParams}`);
   };
 
   return (
@@ -29,7 +35,7 @@ const Index = () => {
           <TravelTabs />
         </div>
 
-        <SearchBox type="flights" onSearch={handleSearch} />
+        <SearchBox type={currentType as any} onSearch={handleSearch} />
 
         <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="bg-white p-6 rounded-lg shadow-md">
