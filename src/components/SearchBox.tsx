@@ -6,6 +6,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { format } from "date-fns";
 import { Calendar as CalendarIcon, Users } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useToast } from "@/hooks/use-toast";
 
 interface SearchBoxProps {
   type: 'flights' | 'trains' | 'buses' | 'hotels';
@@ -19,17 +20,42 @@ export const SearchBox = ({ type, onSearch }: SearchBoxProps) => {
   const [returnDate, setReturnDate] = useState<Date>();
   const [passengers, setPassengers] = useState('1');
   const [roomType, setRoomType] = useState('single');
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const { toast } = useToast();
+
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {};
+
+    if (!from) newErrors.from = 'This field is required';
+    if (type !== 'hotels' && !to) newErrors.to = 'This field is required';
+    if (!date) newErrors.date = 'Please select a date';
+    if ((type === 'flights' || type === 'hotels') && !returnDate) {
+      newErrors.returnDate = 'Please select a return date';
+    }
+    if (!passengers) newErrors.passengers = 'Please select number of passengers';
+    if (type === 'hotels' && !roomType) newErrors.roomType = 'Please select a room type';
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleSearch = () => {
-    onSearch({
-      from,
-      to,
-      date,
-      returnDate,
-      passengers,
-      roomType,
-      type
-    });
+    if (validateForm()) {
+      onSearch({
+        from,
+        to,
+        date,
+        returnDate,
+        passengers,
+        roomType,
+        type
+      });
+    } else {
+      toast({
+        title: "Please fill all required fields",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -41,7 +67,9 @@ export const SearchBox = ({ type, onSearch }: SearchBoxProps) => {
             placeholder={type === 'hotels' ? 'Enter city' : 'Departure location'}
             value={from}
             onChange={(e) => setFrom(e.target.value)}
+            className={errors.from ? 'border-red-500' : ''}
           />
+          {errors.from && <p className="text-red-500 text-sm mt-1">{errors.from}</p>}
         </div>
         
         {type !== 'hotels' && (
@@ -51,7 +79,9 @@ export const SearchBox = ({ type, onSearch }: SearchBoxProps) => {
               placeholder="Destination"
               value={to}
               onChange={(e) => setTo(e.target.value)}
+              className={errors.to ? 'border-red-500' : ''}
             />
+            {errors.to && <p className="text-red-500 text-sm mt-1">{errors.to}</p>}
           </div>
         )}
 
@@ -63,7 +93,7 @@ export const SearchBox = ({ type, onSearch }: SearchBoxProps) => {
             <PopoverTrigger asChild>
               <Button
                 variant="outline"
-                className="w-full justify-start text-left font-normal"
+                className={`w-full justify-start text-left font-normal ${errors.date ? 'border-red-500' : ''}`}
               >
                 <CalendarIcon className="mr-2 h-4 w-4" />
                 {date ? format(date, "PPP") : <span>Pick a date</span>}
@@ -78,6 +108,7 @@ export const SearchBox = ({ type, onSearch }: SearchBoxProps) => {
               />
             </PopoverContent>
           </Popover>
+          {errors.date && <p className="text-red-500 text-sm mt-1">{errors.date}</p>}
         </div>
 
         {(type === 'flights' || type === 'hotels') && (
@@ -89,7 +120,7 @@ export const SearchBox = ({ type, onSearch }: SearchBoxProps) => {
               <PopoverTrigger asChild>
                 <Button
                   variant="outline"
-                  className="w-full justify-start text-left font-normal"
+                  className={`w-full justify-start text-left font-normal ${errors.returnDate ? 'border-red-500' : ''}`}
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
                   {returnDate ? format(returnDate, "PPP") : <span>Pick a date</span>}
@@ -104,6 +135,7 @@ export const SearchBox = ({ type, onSearch }: SearchBoxProps) => {
                 />
               </PopoverContent>
             </Popover>
+            {errors.returnDate && <p className="text-red-500 text-sm mt-1">{errors.returnDate}</p>}
           </div>
         )}
 
@@ -113,7 +145,7 @@ export const SearchBox = ({ type, onSearch }: SearchBoxProps) => {
           </label>
           {type === 'hotels' ? (
             <Select value={roomType} onValueChange={setRoomType}>
-              <SelectTrigger>
+              <SelectTrigger className={errors.roomType ? 'border-red-500' : ''}>
                 <SelectValue placeholder="Select room type" />
               </SelectTrigger>
               <SelectContent>
@@ -124,7 +156,7 @@ export const SearchBox = ({ type, onSearch }: SearchBoxProps) => {
             </Select>
           ) : (
             <Select value={passengers} onValueChange={setPassengers}>
-              <SelectTrigger>
+              <SelectTrigger className={errors.passengers ? 'border-red-500' : ''}>
                 <SelectValue placeholder="Select passengers" />
               </SelectTrigger>
               <SelectContent>
@@ -136,6 +168,8 @@ export const SearchBox = ({ type, onSearch }: SearchBoxProps) => {
               </SelectContent>
             </Select>
           )}
+          {errors.roomType && <p className="text-red-500 text-sm mt-1">{errors.roomType}</p>}
+          {errors.passengers && <p className="text-red-500 text-sm mt-1">{errors.passengers}</p>}
         </div>
 
         <div className="flex items-end md:col-span-4">
