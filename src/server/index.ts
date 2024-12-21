@@ -20,6 +20,27 @@ mongoose.connect('mongodb://localhost:27017/travel_booking')
 app.use('/api', apiRoutes);
 app.use('/api/auth', authRoutes);
 
+// Add some dummy data for testing
+const seedDummyData = async () => {
+  try {
+    // Add a dummy user if none exists
+    const dummyUser = {
+      email: 'test@example.com',
+      password: await bcrypt.hash('password123', 10),
+      name: 'Test User'
+    };
+    
+    const existingUser = await User.findOne({ email: dummyUser.email });
+    if (!existingUser) {
+      await User.create(dummyUser);
+      console.log('Dummy user created');
+    }
+  } catch (error) {
+    console.error('Error seeding dummy data:', error);
+  }
+};
+
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
+  seedDummyData();
 });
