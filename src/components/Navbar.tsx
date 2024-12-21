@@ -6,13 +6,14 @@ import { useToast } from '@/hooks/use-toast';
 export const Navbar = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const token = localStorage.getItem('token');
+  const user = JSON.parse(localStorage.getItem('user') || 'null');
 
   const handleLogout = () => {
     localStorage.removeItem('token');
+    localStorage.removeItem('user');
     toast({
-      title: 'Logged Out',
-      description: 'You have been successfully logged out.',
+      title: 'Logged out successfully',
+      description: 'See you soon!',
     });
     navigate('/');
   };
@@ -26,7 +27,7 @@ export const Navbar = () => {
           </Link>
           
           <div className="flex items-center space-x-4">
-            {token ? (
+            {user ? (
               <>
                 <Link to="/bookings" className="flex items-center space-x-2 text-gray-600 hover:text-primary">
                   <BookMarked className="h-5 w-5" />
@@ -36,16 +37,17 @@ export const Navbar = () => {
                   <Heart className="h-5 w-5" />
                   <span>Wishlist</span>
                 </Link>
-                <Button variant="outline" onClick={handleLogout}>
-                  <LogOut className="h-5 w-5 mr-2" />
-                  Sign Out
+                <Button variant="ghost" onClick={handleLogout} className="flex items-center space-x-2">
+                  <LogOut className="h-5 w-5" />
+                  <span>Logout</span>
                 </Button>
+                <span className="text-gray-600">Welcome, {user.name}!</span>
               </>
             ) : (
               <Link to="/auth">
-                <Button>
-                  <LogIn className="h-5 w-5 mr-2" />
-                  Sign In
+                <Button variant="ghost" className="flex items-center space-x-2">
+                  <LogIn className="h-5 w-5" />
+                  <span>Login</span>
                 </Button>
               </Link>
             )}
