@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import { User } from '../models/User';
@@ -7,7 +7,7 @@ const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 
 // Register
-router.post('/register', async (req, res) => {
+router.post('/register', async (req: Request, res: Response) => {
   try {
     const { email, password, name } = req.body;
     
@@ -20,14 +20,14 @@ router.post('/register', async (req, res) => {
     await user.save();
 
     const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '7d' });
-    res.status(201).json({ token, user: { id: user._id, email: user.email, name: user.name } });
+    return res.status(201).json({ token, user: { id: user._id, email: user.email, name: user.name } });
   } catch (error) {
-    res.status(500).json({ message: 'Error creating user' });
+    return res.status(500).json({ message: 'Error creating user' });
   }
 });
 
 // Login
-router.post('/login', async (req, res) => {
+router.post('/login', async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
     const user = await User.findOne({ email });
@@ -42,9 +42,9 @@ router.post('/login', async (req, res) => {
     }
 
     const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '7d' });
-    res.json({ token, user: { id: user._id, email: user.email, name: user.name } });
+    return res.json({ token, user: { id: user._id, email: user.email, name: user.name } });
   } catch (error) {
-    res.status(500).json({ message: 'Error logging in' });
+    return res.status(500).json({ message: 'Error logging in' });
   }
 });
 
