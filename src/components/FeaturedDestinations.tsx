@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, Heart } from 'lucide-react';
+import { useState } from 'react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from './ui/button';
 import { Card, CardContent, CardFooter, CardTitle } from './ui/card';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from './ui/use-toast';
 
 const destinations = [
   {
@@ -33,13 +33,7 @@ const destinations = [
 
 export const FeaturedDestinations = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [wishlist, setWishlist] = useState<number[]>([]);
   const { toast } = useToast();
-
-  useEffect(() => {
-    const savedWishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
-    setWishlist(savedWishlist.map((item: any) => item.id));
-  }, []);
 
   const handlePrevious = () => {
     setCurrentIndex((prev) => (prev === 0 ? destinations.length - 1 : prev - 1));
@@ -50,37 +44,10 @@ export const FeaturedDestinations = () => {
   };
 
   const handleBook = (destination: typeof destinations[0]) => {
-    const bookings = JSON.parse(localStorage.getItem('bookings') || '[]');
-    bookings.push({ ...destination, type: 'destination' });
-    localStorage.setItem('bookings', JSON.stringify(bookings));
-    
     toast({
       title: "Destination Booked!",
       description: `${destination.name} has been added to your bookings.`,
     });
-  };
-
-  const toggleWishlist = (destination: typeof destinations[0]) => {
-    const savedWishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
-    const isInWishlist = wishlist.includes(destination.id);
-    
-    if (isInWishlist) {
-      const updatedWishlist = savedWishlist.filter((item: any) => item.id !== destination.id);
-      localStorage.setItem('wishlist', JSON.stringify(updatedWishlist));
-      setWishlist(wishlist.filter(id => id !== destination.id));
-      toast({
-        title: "Removed from Wishlist",
-        description: `${destination.name} has been removed from your wishlist.`,
-      });
-    } else {
-      const updatedWishlist = [...savedWishlist, { ...destination, type: 'destination' }];
-      localStorage.setItem('wishlist', JSON.stringify(updatedWishlist));
-      setWishlist([...wishlist, destination.id]);
-      toast({
-        title: "Added to Wishlist",
-        description: `${destination.name} has been added to your wishlist.`,
-      });
-    }
   };
 
   return (
@@ -105,16 +72,9 @@ export const FeaturedDestinations = () => {
                     <CardTitle>{destination.name}</CardTitle>
                     <p className="text-lg font-semibold text-primary">{destination.price}</p>
                   </CardContent>
-                  <CardFooter className="flex justify-between">
+                  <CardFooter>
                     <Button 
-                      variant="outline"
-                      onClick={() => toggleWishlist(destination)}
-                      className={wishlist.includes(destination.id) ? 'bg-pink-50' : ''}
-                    >
-                      <Heart className={`h-4 w-4 mr-2 ${wishlist.includes(destination.id) ? 'fill-pink-500 stroke-pink-500' : ''}`} />
-                      {wishlist.includes(destination.id) ? 'Wishlisted' : 'Add to Wishlist'}
-                    </Button>
-                    <Button 
+                      className="w-full"
                       onClick={() => handleBook(destination)}
                     >
                       Book Now
