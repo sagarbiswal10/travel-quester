@@ -1,58 +1,54 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useToast } from "@/hooks/use-toast";
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useToast } from '@/hooks/use-toast';
 import { Navbar } from '@/components/Navbar';
-import { Footer } from '@/components/Footer';
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+    name: '',
+  });
   const navigate = useNavigate();
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+    const endpoint = isLogin ? '/api/auth/login' : '/api/auth/register';
+
     try {
-      const endpoint = isLogin ? '/api/auth/login' : '/api/auth/register';
       const response = await fetch(endpoint, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
       });
 
       const data = await response.json();
-
+      
       if (response.ok) {
-        if (isLogin) {
-          localStorage.setItem('token', data.token);
-          localStorage.setItem('userId', data.userId);
-          toast({
-            title: "Success!",
-            description: "You have been logged in successfully.",
-          });
-          navigate('/');
-        } else {
-          toast({
-            title: "Success!",
-            description: "Account created successfully. Please log in.",
-          });
-          setIsLogin(true);
-        }
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+        toast({
+          title: isLogin ? 'Login Successful' : 'Registration Successful',
+          description: `Welcome ${data.user.name}!`,
+        });
+        navigate('/');
       } else {
-        throw new Error(data.message);
+        toast({
+          title: 'Error',
+          description: data.message,
+          variant: 'destructive',
+        });
       }
-    } catch (error: any) {
+    } catch (error) {
       toast({
-        title: "Error",
-        description: error.message || "Something went wrong",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Something went wrong. Please try again.',
+        variant: 'destructive',
       });
     }
   };
@@ -67,41 +63,43 @@ const Auth = () => {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
+              {!isLogin && (
                 <Input
-                  type="email"
-                  placeholder="Email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Name"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   required
                 />
-              </div>
-              <div>
-                <Input
-                  type="password"
-                  placeholder="Password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                />
-              </div>
+              )}
+              <Input
+                type="email"
+                placeholder="Email"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                required
+              />
+              <Input
+                type="password"
+                placeholder="Password"
+                value={formData.password}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                required
+              />
               <Button type="submit" className="w-full">
                 {isLogin ? 'Login' : 'Register'}
               </Button>
-            </form>
-            <p className="text-center mt-4">
-              {isLogin ? "Don't have an account? " : "Already have an account? "}
-              <button
+              <Button
+                type="button"
+                variant="ghost"
+                className="w-full"
                 onClick={() => setIsLogin(!isLogin)}
-                className="text-primary hover:underline"
               >
-                {isLogin ? 'Register' : 'Login'}
-              </button>
-            </p>
+                {isLogin ? "Don't have an account? Register" : 'Already have an account? Login'}
+              </Button>
+            </form>
           </CardContent>
         </Card>
       </div>
-      <Footer />
     </div>
   );
 };

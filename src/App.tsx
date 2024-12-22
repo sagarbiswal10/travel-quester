@@ -8,6 +8,7 @@ import SearchResults from "./pages/SearchResults";
 import MyBookings from "./pages/MyBookings";
 import Wishlist from "./pages/Wishlist";
 import Auth from "./pages/Auth";
+import { Footer } from "./components/Footer";
 
 const queryClient = new QueryClient();
 
@@ -17,18 +18,23 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/flights" element={<Index />} />
-          <Route path="/trains" element={<Index />} />
-          <Route path="/buses" element={<Index />} />
-          <Route path="/hotels" element={<Index />} />
-          <Route path="/search" element={<SearchResults />} />
-          <Route path="/bookings" element={<MyBookings />} />
-          <Route path="/wishlist" element={<Wishlist />} />
-          <Route path="/auth" element={<Auth />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+        <div className="flex flex-col min-h-screen">
+          <div className="flex-grow">
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/flights" element={<Index />} />
+              <Route path="/trains" element={<Index />} />
+              <Route path="/buses" element={<Index />} />
+              <Route path="/hotels" element={<Index />} />
+              <Route path="/search" element={<SearchResults />} />
+              <Route path="/bookings" element={<MyBookings />} />
+              <Route path="/wishlist" element={<Wishlist />} />
+              <Route path="/auth" element={<Auth />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </div>
+          <Footer />
+        </div>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
