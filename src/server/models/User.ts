@@ -10,6 +10,14 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  bookings: [{
+    type: mongoose.Schema.Types.Mixed,
+    default: []
+  }],
+  wishlist: [{
+    type: mongoose.Schema.Types.Mixed,
+    default: []
+  }],
   createdAt: {
     type: Date,
     default: Date.now

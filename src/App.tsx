@@ -7,6 +7,7 @@ import Index from "./pages/Index";
 import SearchResults from "./pages/SearchResults";
 import MyBookings from "./pages/MyBookings";
 import Wishlist from "./pages/Wishlist";
+import Auth from "./pages/Auth";
 
 const queryClient = new QueryClient();
 
@@ -25,6 +26,7 @@ const App = () => (
           <Route path="/search" element={<SearchResults />} />
           <Route path="/bookings" element={<MyBookings />} />
           <Route path="/wishlist" element={<Wishlist />} />
+          <Route path="/auth" element={<Auth />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>

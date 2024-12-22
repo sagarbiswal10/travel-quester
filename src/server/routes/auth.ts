@@ -17,7 +17,8 @@ router.post('/register', async (req: Request, res: Response) => {
     }
 
     // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
 
     // Create new user
     const user = new User({
@@ -53,11 +54,11 @@ router.post('/login', async (req: Request, res: Response) => {
     // Generate JWT token
     const token = jwt.sign(
       { userId: user._id },
-      process.env.JWT_SECRET || 'your-secret-key',
+      'your-secret-key', // In production, use environment variable
       { expiresIn: '1h' }
     );
 
-    return res.json({ token });
+    return res.json({ token, userId: user._id });
   } catch (error) {
     console.error('Login error:', error);
     return res.status(500).json({ message: 'Server error' });
