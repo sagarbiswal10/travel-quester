@@ -21,15 +21,25 @@ const Auth = () => {
     const endpoint = isLogin ? '/api/auth/login' : '/api/auth/register';
 
     try {
+      console.log('Submitting to:', endpoint, formData); // Debug log
       const response = await fetch(endpoint, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        credentials: 'include',
         body: JSON.stringify(formData),
       });
 
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Authentication failed');
+      }
+
       const data = await response.json();
       
-      if (response.ok) {
+      if (data.token) {
         localStorage.setItem('token', data.token);
         localStorage.setItem('user', JSON.stringify(data.user));
         toast({
@@ -38,16 +48,13 @@ const Auth = () => {
         });
         navigate('/');
       } else {
-        toast({
-          title: 'Error',
-          description: data.message,
-          variant: 'destructive',
-        });
+        throw new Error('No token received');
       }
     } catch (error) {
+      console.error('Auth error:', error);
       toast({
         title: 'Error',
-        description: 'Something went wrong. Please try again.',
+        description: error instanceof Error ? error.message : 'Authentication failed',
         variant: 'destructive',
       });
     }
