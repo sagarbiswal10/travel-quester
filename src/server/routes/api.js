@@ -5,6 +5,7 @@ const router = express.Router();
 router.get('/search', async (req, res) => {
   try {
     const { type, from, to, date, returnDate, passengers, roomType } = req.query;
+    console.log('Search params:', { type, from, to, date, returnDate, passengers, roomType }); // Debug log
     
     let query = { type };
     

@@ -22,11 +22,11 @@ const dummyUsers = [
 router.post('/register', async (req, res) => {
   try {
     const { email, password, name } = req.body;
+    console.log('Register attempt:', { email, name }); // Debug log
     
     const existingUser = dummyUsers.find(user => user.email === email);
     if (existingUser) {
-      res.status(400).json({ message: 'User already exists' });
-      return;
+      return res.status(400).json({ message: 'User already exists' });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
