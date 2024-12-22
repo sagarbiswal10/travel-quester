@@ -51,6 +51,7 @@ router.post('/register', async (req, res) => {
       } 
     });
   } catch (error) {
+    console.error('Register error:', error);
     res.status(500).json({ message: 'Error creating user' });
   }
 });
@@ -59,11 +60,12 @@ router.post('/register', async (req, res) => {
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
+    console.log('Login attempt for:', email); // Debug log
+    
     const user = dummyUsers.find(user => user.email === email);
     
     if (!user) {
-      res.status(400).json({ message: 'User not found' });
-      return;
+      return res.status(400).json({ message: 'User not found' });
     }
 
     // For the test user with email test@example.com, accept 'password123' directly
@@ -72,8 +74,7 @@ router.post('/login', async (req, res) => {
       : await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
-      res.status(400).json({ message: 'Invalid credentials' });
-      return;
+      return res.status(400).json({ message: 'Invalid credentials' });
     }
 
     const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: '7d' });
@@ -86,6 +87,7 @@ router.post('/login', async (req, res) => {
       } 
     });
   } catch (error) {
+    console.error('Login error:', error);
     res.status(500).json({ message: 'Error logging in' });
   }
 });
