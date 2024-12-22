@@ -1,50 +1,50 @@
-import express, { Request, Response, Router } from 'express';
-import jwt from 'jsonwebtoken';
+import express from 'express';
 import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 import { User } from '../models/User';
 
-const router: Router = express.Router();
+const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 
-// Register
-router.post('/register', async (req: Request, res: Response) => {
+// Register endpoint
+router.post('/register', async (req, res) => {
   try {
     const { email, password, name } = req.body;
     
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.status(400).json({ message: 'User already exists' });
+      res.status(400).json({ message: 'User already exists' });
     }
 
     const user = new User({ email, password, name });
     await user.save();
 
     const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '7d' });
-    return res.status(201).json({ token, user: { id: user._id, email: user.email, name: user.name } });
+    res.status(201).json({ token, user: { id: user._id, email: user.email, name: user.name } });
   } catch (error) {
-    return res.status(500).json({ message: 'Error creating user' });
+    res.status(500).json({ message: 'Error creating user' });
   }
 });
 
-// Login
-router.post('/login', async (req: Request, res: Response) => {
+// Login endpoint
+router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
     const user = await User.findOne({ email });
     
     if (!user) {
-      return res.status(400).json({ message: 'User not found' });
+      res.status(400).json({ message: 'User not found' });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(400).json({ message: 'Invalid credentials' });
+      res.status(400).json({ message: 'Invalid credentials' });
     }
 
     const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '7d' });
-    return res.json({ token, user: { id: user._id, email: user.email, name: user.name } });
+    res.json({ token, user: { id: user._id, email: user.email, name: user.name } });
   } catch (error) {
-    return res.status(500).json({ message: 'Error logging in' });
+    res.status(500).json({ message: 'Error logging in' });
   }
 });
 
