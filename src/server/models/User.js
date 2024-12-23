@@ -21,6 +21,22 @@ const userSchema = new mongoose.Schema({
   wishlist: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Destination'
+  }],
+  payments: [{
+    bookingId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Booking'
+    },
+    amount: Number,
+    status: {
+      type: String,
+      enum: ['pending', 'completed', 'failed'],
+      default: 'pending'
+    },
+    date: {
+      type: Date,
+      default: Date.now
+    }
   }]
 }, { timestamps: true });
 

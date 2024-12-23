@@ -24,43 +24,21 @@ router.get('/search', async (req, res) => {
   }
 });
 
-// Get user bookings
-router.get('/bookings/:userId', async (req, res) => {
+// Add to wishlist
+router.post('/wishlist/:userId', async (req, res) => {
   try {
-    const bookings = await Booking.find({ user: req.params.userId })
-      .populate('destination')
-      .sort('-createdAt');
-    res.json(bookings);
+    const { destinationId } = req.body;
+    await User.findByIdAndUpdate(
+      req.params.userId,
+      { $addToSet: { wishlist: destinationId } }
+    );
+    res.status(200).json({ message: 'Added to wishlist' });
   } catch (error) {
-    res.status(500).json({ error: 'Error fetching bookings' });
+    res.status(500).json({ error: 'Error adding to wishlist' });
   }
 });
 
-// Create booking
-router.post('/bookings', async (req, res) => {
-  try {
-    const { userId, destinationId, date, returnDate, passengers, roomType } = req.body;
-    
-    const booking = new Booking({
-      user: userId,
-      destination: destinationId,
-      date,
-      returnDate,
-      passengers,
-      roomType,
-      status: 'confirmed'
-    });
-
-    await booking.save();
-    await User.findByIdAndUpdate(userId, { $push: { bookings: booking._id } });
-
-    res.status(201).json(booking);
-  } catch (error) {
-    res.status(500).json({ error: 'Error creating booking' });
-  }
-});
-
-// Get user wishlist
+// Get wishlist
 router.get('/wishlist/:userId', async (req, res) => {
   try {
     const user = await User.findById(req.params.userId).populate('wishlist');
@@ -70,25 +48,64 @@ router.get('/wishlist/:userId', async (req, res) => {
   }
 });
 
-// Add to wishlist
-router.post('/wishlist', async (req, res) => {
-  try {
-    const { userId, destinationId } = req.body;
-    await User.findByIdAndUpdate(userId, { $addToSet: { wishlist: destinationId } });
-    res.status(200).json({ message: 'Added to wishlist' });
-  } catch (error) {
-    res.status(500).json({ error: 'Error adding to wishlist' });
-  }
-});
-
 // Remove from wishlist
-router.delete('/wishlist', async (req, res) => {
+router.delete('/wishlist/:userId/:destinationId', async (req, res) => {
   try {
-    const { userId, destinationId } = req.body;
-    await User.findByIdAndUpdate(userId, { $pull: { wishlist: destinationId } });
+    await User.findByIdAndUpdate(
+      req.params.userId,
+      { $pull: { wishlist: req.params.destinationId } }
+    );
     res.status(200).json({ message: 'Removed from wishlist' });
   } catch (error) {
     res.status(500).json({ error: 'Error removing from wishlist' });
+  }
+});
+
+// Process payment
+router.post('/payments/:bookingId', async (req, res) => {
+  try {
+    const { userId } = req.body;
+    const booking = await Booking.findById(req.params.bookingId);
+    
+    if (!booking) {
+      return res.status(404).json({ message: 'Booking not found' });
+    }
+
+    // Update user's payment history
+    await User.findByIdAndUpdate(userId, {
+      $push: {
+        payments: {
+          bookingId: booking._id,
+          amount: booking.price,
+          status: 'completed'
+        }
+      }
+    });
+
+    // Update booking status
+    await Booking.findByIdAndUpdate(req.params.bookingId, {
+      status: 'confirmed'
+    });
+
+    res.status(200).json({ message: 'Payment processed successfully' });
+  } catch (error) {
+    console.error('Payment error:', error);
+    res.status(500).json({ error: 'Error processing payment' });
+  }
+});
+
+// Get payment history
+router.get('/payments/:userId', async (req, res) => {
+  try {
+    const user = await User.findById(req.params.userId)
+      .populate({
+        path: 'payments.bookingId',
+        populate: { path: 'destination' }
+      });
+    
+    res.json(user.payments);
+  } catch (error) {
+    res.status(500).json({ error: 'Error fetching payment history' });
   }
 });
 

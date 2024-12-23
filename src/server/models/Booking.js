@@ -15,9 +15,15 @@ const bookingSchema = new mongoose.Schema({
   returnDate: Date,
   passengers: Number,
   roomType: String,
+  price: Number,
   status: {
     type: String,
     enum: ['pending', 'confirmed', 'cancelled'],
+    default: 'pending'
+  },
+  paymentStatus: {
+    type: String,
+    enum: ['pending', 'completed', 'failed'],
     default: 'pending'
   }
 }, { timestamps: true });
