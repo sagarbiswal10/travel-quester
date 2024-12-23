@@ -1,0 +1,89 @@
+{
+  "destinations": [
+    {
+      "name": "Luxury Beach Resort",
+      "image": "https://example.com/beach-resort.jpg",
+      "price": "$299",
+      "type": "hotel",
+      "location": "Miami Beach, Florida",
+      "rating": "4.5",
+      "roomType": "Deluxe Suite"
+    },
+    {
+      "name": "Mountain View Hotel",
+      "image": "https://example.com/mountain-hotel.jpg",
+      "price": "$199",
+      "type": "hotel",
+      "location": "Aspen, Colorado",
+      "rating": "4.8",
+      "roomType": "Standard Room"
+    },
+    {
+      "name": "New York to Los Angeles",
+      "image": "https://example.com/flight.jpg",
+      "price": "$399",
+      "type": "flight",
+      "from": "New York",
+      "to": "Los Angeles",
+      "airline": "American Airlines",
+      "departure": "10:00 AM",
+      "arrival": "1:00 PM"
+    },
+    {
+      "name": "Chicago to Miami",
+      "image": "https://example.com/flight2.jpg",
+      "price": "$299",
+      "type": "flight",
+      "from": "Chicago",
+      "to": "Miami",
+      "airline": "United Airlines",
+      "departure": "2:00 PM",
+      "arrival": "5:00 PM"
+    },
+    {
+      "name": "Boston to Washington DC",
+      "image": "https://example.com/train.jpg",
+      "price": "$129",
+      "type": "train",
+      "from": "Boston",
+      "to": "Washington DC",
+      "operator": "Amtrak",
+      "departure": "9:00 AM",
+      "arrival": "3:00 PM"
+    },
+    {
+      "name": "Seattle to Portland",
+      "image": "https://example.com/bus.jpg",
+      "price": "$49",
+      "type": "bus",
+      "from": "Seattle",
+      "to": "Portland",
+      "operator": "Greyhound",
+      "departure": "11:00 AM",
+      "arrival": "3:00 PM"
+    }
+  ],
+  "users": [
+    {
+      "name": "John Doe",
+      "email": "john@example.com",
+      "password": "hashedPassword123",
+      "bookings": [],
+      "wishlist": [],
+      "payments": []
+    }
+  ],
+  "bookings": [
+    {
+      "user": "user_id_here",
+      "destination": "destination_id_here",
+      "date": "2024-03-20T10:00:00.000Z",
+      "returnDate": "2024-03-25T10:00:00.000Z",
+      "passengers": 2,
+      "roomType": "Deluxe Suite",
+      "price": 299,
+      "status": "pending",
+      "paymentStatus": "pending"
+    }
+  ]
+}
