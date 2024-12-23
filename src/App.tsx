@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Index from "./pages/Index";
 import SearchResults from "./pages/SearchResults";
 import MyBookings from "./pages/MyBookings";
+import Payment from "./pages/Payment";
 import Wishlist from "./pages/Wishlist";
 import Auth from "./pages/Auth";
 import { Footer } from "./components/Footer";
@@ -28,6 +29,7 @@ const App = () => (
               <Route path="/hotels" element={<Index />} />
               <Route path="/search" element={<SearchResults />} />
               <Route path="/bookings" element={<MyBookings />} />
+              <Route path="/payment/:bookingId" element={<Payment />} />
               <Route path="/wishlist" element={<Wishlist />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="*" element={<Navigate to="/" replace />} />
