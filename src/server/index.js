@@ -3,6 +3,7 @@ import cors from 'cors';
 import mongoose from 'mongoose';
 import apiRoutes from './routes/api.js';
 import authRoutes from './routes/auth.js';
+import bookingRoutes from './routes/bookings.js';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -21,6 +22,7 @@ app.use(express.json());
 
 // Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/bookings', bookingRoutes);
 app.use('/api', apiRoutes);
 
 // Error handling middleware

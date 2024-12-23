@@ -21,10 +21,13 @@ router.post('/register', async (req, res) => {
     const user = new User({
       email,
       password: hashedPassword,
-      name
+      name,
+      bookings: [],
+      wishlist: []
     });
 
     await user.save();
+    console.log('User saved to database:', user._id);
 
     const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '7d' });
     res.status(201).json({
