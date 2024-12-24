@@ -21,7 +21,6 @@ const Auth = () => {
     const endpoint = isLogin ? '/api/auth/login' : '/api/auth/register';
 
     try {
-      console.log('Submitting to:', endpoint, formData); // Debug log
       const response = await fetch(endpoint, {
         method: 'POST',
         headers: { 
@@ -32,12 +31,11 @@ const Auth = () => {
         body: JSON.stringify(formData),
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Authentication failed');
-      }
-
       const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Authentication failed');
+      }
       
       if (data.token) {
         localStorage.setItem('token', data.token);

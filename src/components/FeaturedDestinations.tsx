@@ -3,6 +3,7 @@ import { ChevronLeft, ChevronRight, Heart } from 'lucide-react';
 import { Button } from './ui/button';
 import { Card, CardContent, CardFooter, CardTitle } from './ui/card';
 import { useToast } from '@/hooks/use-toast';
+import { useNavigate } from 'react-router-dom';
 
 const destinations = [
   {
@@ -35,6 +36,7 @@ export const FeaturedDestinations = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [wishlist, setWishlist] = useState<number[]>([]);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const savedWishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
@@ -49,7 +51,23 @@ export const FeaturedDestinations = () => {
     setCurrentIndex((prev) => (prev === destinations.length - 1 ? 0 : prev + 1));
   };
 
+  const checkAuth = () => {
+    const user = JSON.parse(localStorage.getItem('user') || 'null');
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to continue.",
+        variant: "destructive",
+      });
+      navigate('/auth');
+      return false;
+    }
+    return true;
+  };
+
   const handleBook = (destination: typeof destinations[0]) => {
+    if (!checkAuth()) return;
+    
     const bookings = JSON.parse(localStorage.getItem('bookings') || '[]');
     bookings.push({ ...destination, type: 'destination' });
     localStorage.setItem('bookings', JSON.stringify(bookings));
@@ -61,6 +79,8 @@ export const FeaturedDestinations = () => {
   };
 
   const toggleWishlist = (destination: typeof destinations[0]) => {
+    if (!checkAuth()) return;
+    
     const savedWishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
     const isInWishlist = wishlist.includes(destination.id);
     
