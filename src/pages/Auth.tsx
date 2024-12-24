@@ -3,6 +3,33 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
+import { gql, useMutation } from '@apollo/client';
+
+const LOGIN_MUTATION = gql`
+  mutation Login($email: String!, $password: String!) {
+    login(email: $email, password: $password) {
+      token
+      user {
+        id
+        name
+        email
+      }
+    }
+  }
+`;
+
+const REGISTER_MUTATION = gql`
+  mutation Register($name: String!, $email: String!, $password: String!) {
+    register(name: $name, email: $email, password: $password) {
+      token
+      user {
+        id
+        name
+        email
+      }
+    }
+  }
+`;
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -14,31 +41,27 @@ const Auth = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  const [login] = useMutation(LOGIN_MUTATION);
+  const [register] = useMutation(REGISTER_MUTATION);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     try {
-      const response = await fetch(`http://localhost:5000${isLogin ? '/login' : '/register'}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
+      const mutation = isLogin ? login : register;
+      const { data } = await mutation({
+        variables: formData,
       });
 
-      const data = await response.json();
+      const result = isLogin ? data.login : data.register;
 
-      if (!response.ok) {
-        throw new Error(data.message || 'Authentication failed');
-      }
-
-      if (data.token) {
-        localStorage.setItem('token', data.token);
-        localStorage.setItem('user', JSON.stringify(data.user));
+      if (result.token) {
+        localStorage.setItem('token', result.token);
+        localStorage.setItem('user', JSON.stringify(result.user));
         
         toast({
           title: isLogin ? 'Login Successful' : 'Registration Successful',
-          description: `Welcome${data.user.name ? `, ${data.user.name}` : ''}!`,
+          description: `Welcome${result.user.name ? `, ${result.user.name}` : ''}!`,
         });
         
         navigate('/');

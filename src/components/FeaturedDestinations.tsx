@@ -4,6 +4,30 @@ import { Button } from './ui/button';
 import { Card, CardContent, CardFooter, CardTitle } from './ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
+import { gql, useMutation } from '@apollo/client';
+
+const CREATE_BOOKING = gql`
+  mutation CreateBooking($destinationId: ID!, $date: String!, $passengers: Int) {
+    createBooking(destinationId: $destinationId, date: $date, passengers: $passengers) {
+      id
+      destination {
+        name
+        price
+      }
+      date
+      passengers
+    }
+  }
+`;
+
+const ADD_TO_WISHLIST = gql`
+  mutation AddToWishlist($destinationId: ID!) {
+    addToWishlist(destinationId: $destinationId) {
+      id
+      name
+    }
+  }
+`;
 
 const destinations = [
   {
@@ -38,9 +62,15 @@ export const FeaturedDestinations = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
+  const [createBooking] = useMutation(CREATE_BOOKING);
+  const [addToWishlist] = useMutation(ADD_TO_WISHLIST);
+
   useEffect(() => {
-    const savedWishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
-    setWishlist(savedWishlist.map((item: any) => item.id));
+    // Fetch wishlist from database instead of localStorage
+    const fetchWishlist = async () => {
+      // Implementation will depend on your GraphQL schema
+    };
+    fetchWishlist();
   }, []);
 
   const handlePrevious = () => {
@@ -52,8 +82,8 @@ export const FeaturedDestinations = () => {
   };
 
   const checkAuth = () => {
-    const user = JSON.parse(localStorage.getItem('user') || 'null');
-    if (!user) {
+    const token = localStorage.getItem('token');
+    if (!token) {
       toast({
         title: "Authentication Required",
         description: "Please sign in to continue.",
@@ -65,40 +95,56 @@ export const FeaturedDestinations = () => {
     return true;
   };
 
-  const handleBook = (destination: typeof destinations[0]) => {
+  const handleBook = async (destination: typeof destinations[0]) => {
     if (!checkAuth()) return;
     
-    const bookings = JSON.parse(localStorage.getItem('bookings') || '[]');
-    bookings.push({ ...destination, type: 'destination' });
-    localStorage.setItem('bookings', JSON.stringify(bookings));
-    
-    toast({
-      title: "Destination Booked!",
-      description: `${destination.name} has been added to your bookings.`,
-    });
+    try {
+      const { data } = await createBooking({
+        variables: {
+          destinationId: destination.id,
+          date: new Date().toISOString(),
+          passengers: 1,
+        },
+      });
+
+      toast({
+        title: "Booking Successful!",
+        description: `${destination.name} has been booked successfully.`,
+      });
+    } catch (error) {
+      toast({
+        title: "Booking Failed",
+        description: error instanceof Error ? error.message : "Failed to create booking",
+        variant: "destructive",
+      });
+    }
   };
 
-  const toggleWishlist = (destination: typeof destinations[0]) => {
+  const toggleWishlist = async (destination: typeof destinations[0]) => {
     if (!checkAuth()) return;
     
-    const savedWishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
-    const isInWishlist = wishlist.includes(destination.id);
-    
-    if (isInWishlist) {
-      const updatedWishlist = savedWishlist.filter((item: any) => item.id !== destination.id);
-      localStorage.setItem('wishlist', JSON.stringify(updatedWishlist));
-      setWishlist(wishlist.filter(id => id !== destination.id));
-      toast({
-        title: "Removed from Wishlist",
-        description: `${destination.name} has been removed from your wishlist.`,
+    try {
+      const { data } = await addToWishlist({
+        variables: {
+          destinationId: destination.id,
+        },
       });
-    } else {
-      const updatedWishlist = [...savedWishlist, { ...destination, type: 'destination' }];
-      localStorage.setItem('wishlist', JSON.stringify(updatedWishlist));
-      setWishlist([...wishlist, destination.id]);
+
+      setWishlist(prev => 
+        prev.includes(destination.id) 
+          ? prev.filter(id => id !== destination.id)
+          : [...prev, destination.id]
+      );
+
       toast({
-        title: "Added to Wishlist",
-        description: `${destination.name} has been added to your wishlist.`,
+        title: prev.includes(destination.id) ? "Removed from Wishlist" : "Added to Wishlist",
+        description: `${destination.name} has been ${prev.includes(destination.id) ? 'removed from' : 'added to'} your wishlist.`,
+      });
+    } catch (error) {
+      toast({
+        title: "Wishlist Update Failed",
+        description: error instanceof Error ? error.message : "Failed to update wishlist",
+        variant: "destructive",
       });
     }
   };
