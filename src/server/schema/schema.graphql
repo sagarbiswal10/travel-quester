@@ -1,0 +1,51 @@
+type User {
+  id: ID!
+  name: String!
+  email: String!
+  bookings: [Booking!]
+  wishlist: [Destination!]
+}
+
+type Destination {
+  id: ID!
+  name: String!
+  image: String!
+  price: String!
+  type: String!
+  description: String
+  rating: Float
+  location: String
+}
+
+type Booking {
+  id: ID!
+  user: User!
+  destination: Destination!
+  date: String!
+  returnDate: String
+  passengers: Int
+  roomType: String
+  status: String!
+  paymentStatus: String!
+}
+
+type AuthPayload {
+  token: String!
+  user: User!
+}
+
+type Query {
+  featuredDestinations: [Destination!]!
+  popularDestinations: [Destination!]!
+  searchResults(type: String!, from: String, to: String): [Destination!]!
+  myBookings: [Booking!]!
+  myWishlist: [Destination!]!
+}
+
+type Mutation {
+  login(email: String!, password: String!): AuthPayload!
+  register(name: String!, email: String!, password: String!): AuthPayload!
+  addToWishlist(destinationId: ID!): Destination!
+  removeFromWishlist(destinationId: ID!): Destination!
+  createBooking(destinationId: ID!, date: String!, returnDate: String, passengers: Int, roomType: String): Booking!
+}

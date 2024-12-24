@@ -1,9 +1,11 @@
 import express from 'express';
-import cors from 'cors';
+import { ApolloServer } from 'apollo-server-express';
+import { readFileSync } from 'fs';
+import { join } from 'path';
 import mongoose from 'mongoose';
-import apiRoutes from './routes/api.js';
-import authRoutes from './routes/auth.js';
-import bookingRoutes from './routes/bookings.js';
+import jwt from 'jsonwebtoken';
+import cors from 'cors';
+import resolvers from './resolvers/resolvers.js';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -20,22 +22,27 @@ app.use(cors({
 }));
 app.use(express.json());
 
-// Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/bookings', bookingRoutes);
-app.use('/api', apiRoutes);
+// Read schema
+const typeDefs = readFileSync(join(process.cwd(), 'src/server/schema/schema.graphql'), 'utf-8');
 
-// Error handling middleware
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({ message: 'Something broke!' });
+// Create Apollo Server
+const server = new ApolloServer({
+  typeDefs,
+  resolvers,
+  context: ({ req }) => {
+    const token = req.headers.authorization || '';
+    try {
+      const user = jwt.verify(token.replace('Bearer ', ''), process.env.JWT_SECRET);
+      return { user };
+    } catch (err) {
+      return { user: null };
+    }
+  },
 });
 
-// 404 handler
-app.use((req, res) => {
-  res.status(404).json({ message: `Route ${req.url} not found` });
-});
+await server.start();
+server.applyMiddleware({ app, path: '/graphql' });
 
 app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+  console.log(`Server running on http://localhost:${PORT}/graphql`);
 });

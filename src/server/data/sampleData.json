@@ -1,89 +1,65 @@
 {
-  "destinations": [
+  "featuredDestinations": [
     {
-      "name": "Luxury Beach Resort",
-      "image": "https://example.com/beach-resort.jpg",
-      "price": "$299",
-      "type": "hotel",
-      "location": "Miami Beach, Florida",
-      "rating": "4.5",
-      "roomType": "Deluxe Suite"
+      "id": "fd1",
+      "name": "Paris, France",
+      "image": "https://images.unsplash.com/photo-1472396961693-142e6e269027",
+      "price": "$599",
+      "type": "destination",
+      "description": "City of Love and Lights",
+      "rating": 4.8
     },
     {
-      "name": "Mountain View Hotel",
-      "image": "https://example.com/mountain-hotel.jpg",
-      "price": "$199",
-      "type": "hotel",
-      "location": "Aspen, Colorado",
-      "rating": "4.8",
-      "roomType": "Standard Room"
+      "id": "fd2",
+      "name": "Bali, Indonesia",
+      "image": "https://images.unsplash.com/photo-1433086966358-54859d0ed716",
+      "price": "$799",
+      "type": "destination",
+      "description": "Tropical Paradise",
+      "rating": 4.7
+    }
+  ],
+  "popularDestinations": [
+    {
+      "id": "pd1",
+      "name": "Tokyo, Japan",
+      "image": "https://images.unsplash.com/photo-1465146344425-f00d5f5c8f07",
+      "price": "$899",
+      "type": "destination",
+      "description": "Modern Metropolis",
+      "rating": 4.9
     },
     {
-      "name": "New York to Los Angeles",
-      "image": "https://example.com/flight.jpg",
-      "price": "$399",
+      "id": "pd2",
+      "name": "New York, USA",
+      "image": "https://images.unsplash.com/photo-1482938289607-e9573fc25ebb",
+      "price": "$699",
+      "type": "destination",
+      "description": "The City That Never Sleeps",
+      "rating": 4.6
+    }
+  ],
+  "searchResults": [
+    {
+      "id": "sr1",
       "type": "flight",
       "from": "New York",
-      "to": "Los Angeles",
-      "airline": "American Airlines",
+      "to": "London",
+      "airline": "Delta",
+      "price": "$450",
       "departure": "10:00 AM",
-      "arrival": "1:00 PM"
+      "arrival": "10:00 PM",
+      "image": "https://images.unsplash.com/photo-1436491865332-7a61a109cc05"
     },
     {
-      "name": "Chicago to Miami",
-      "image": "https://example.com/flight2.jpg",
-      "price": "$299",
-      "type": "flight",
-      "from": "Chicago",
-      "to": "Miami",
-      "airline": "United Airlines",
-      "departure": "2:00 PM",
-      "arrival": "5:00 PM"
-    },
-    {
-      "name": "Boston to Washington DC",
-      "image": "https://example.com/train.jpg",
-      "price": "$129",
-      "type": "train",
-      "from": "Boston",
-      "to": "Washington DC",
-      "operator": "Amtrak",
-      "departure": "9:00 AM",
-      "arrival": "3:00 PM"
-    },
-    {
-      "name": "Seattle to Portland",
-      "image": "https://example.com/bus.jpg",
-      "price": "$49",
-      "type": "bus",
-      "from": "Seattle",
-      "to": "Portland",
-      "operator": "Greyhound",
-      "departure": "11:00 AM",
-      "arrival": "3:00 PM"
-    }
-  ],
-  "users": [
-    {
-      "name": "John Doe",
-      "email": "john@example.com",
-      "password": "hashedPassword123",
-      "bookings": [],
-      "wishlist": [],
-      "payments": []
-    }
-  ],
-  "bookings": [
-    {
-      "user": "user_id_here",
-      "destination": "destination_id_here",
-      "date": "2024-03-20T10:00:00.000Z",
-      "returnDate": "2024-03-25T10:00:00.000Z",
-      "passengers": 2,
-      "roomType": "Deluxe Suite",
-      "price": 299,
-      "status": "pending",
-      "paymentStatus": "pending"
+      "id": "sr2",
+      "type": "hotel",
+      "name": "Grand Hotel",
+      "location": "Paris",
+      "price": "$200",
+      "rating": 4.5,
+      "roomType": "Double Room",
+      "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945"
     }
   ]
 }
