@@ -2,8 +2,10 @@ type User {
   id: ID!
   name: String!
   email: String!
-  bookings: [Booking!]
-  wishlist: [Destination!]
+  password: String!
+  bookings: [Booking]
+  wishlist: [Destination]
+  payments: [Payment]
 }
 
 type Destination {
@@ -12,9 +14,15 @@ type Destination {
   image: String!
   price: String!
   type: String!
-  description: String
-  rating: Float
+  from: String
+  to: String
+  operator: String
+  airline: String
+  departure: String
+  arrival: String
   location: String
+  rating: String
+  roomType: String
 }
 
 type Booking {
@@ -27,6 +35,14 @@ type Booking {
   roomType: String
   status: String!
   paymentStatus: String!
+}
+
+type Payment {
+  id: ID!
+  bookingId: ID!
+  amount: Float!
+  status: String!
+  date: String!
 }
 
 type AuthPayload {
@@ -47,5 +63,11 @@ type Mutation {
   register(name: String!, email: String!, password: String!): AuthPayload!
   addToWishlist(destinationId: ID!): Destination!
   removeFromWishlist(destinationId: ID!): Destination!
-  createBooking(destinationId: ID!, date: String!, returnDate: String, passengers: Int, roomType: String): Booking!
+  createBooking(
+    destinationId: ID!
+    date: String!
+    returnDate: String
+    passengers: Int
+    roomType: String
+  ): Booking!
 }

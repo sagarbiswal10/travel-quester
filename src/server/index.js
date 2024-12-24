@@ -1,11 +1,15 @@
 import express from 'express';
 import { ApolloServer } from 'apollo-server-express';
 import { readFileSync } from 'fs';
-import { join } from 'path';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
 import mongoose from 'mongoose';
 import jwt from 'jsonwebtoken';
 import cors from 'cors';
 import resolvers from './resolvers/resolvers.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -22,8 +26,8 @@ app.use(cors({
 }));
 app.use(express.json());
 
-// Read schema
-const typeDefs = readFileSync(join(process.cwd(), 'src/server/schema/schema.graphql'), 'utf-8');
+// Read schema - fixing the path
+const typeDefs = readFileSync(join(__dirname, 'schema', 'schema.graphql'), 'utf-8');
 
 // Create Apollo Server
 const server = new ApolloServer({
@@ -32,7 +36,7 @@ const server = new ApolloServer({
   context: ({ req }) => {
     const token = req.headers.authorization || '';
     try {
-      const user = jwt.verify(token.replace('Bearer ', ''), process.env.JWT_SECRET);
+      const user = jwt.verify(token.replace('Bearer ', ''), process.env.JWT_SECRET || 'your-secret-key');
       return { user };
     } catch (err) {
       return { user: null };
