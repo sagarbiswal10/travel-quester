@@ -15,8 +15,16 @@ const destinationSchema = new mongoose.Schema({
   },
   type: {
     type: String,
-    enum: ['flight', 'train', 'bus', 'hotel'],
+    enum: ['flight', 'train', 'bus', 'hotel', 'featured', 'popular'],
     required: true
+  },
+  description: {
+    type: String,
+    required: false
+  },
+  rating: {
+    type: Number,
+    required: false
   },
   from: String,
   to: String,
@@ -25,7 +33,6 @@ const destinationSchema = new mongoose.Schema({
   departure: String,
   arrival: String,
   location: String,
-  rating: String,
   roomType: String
 }, { timestamps: true });
 

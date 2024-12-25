@@ -33,6 +33,27 @@ const dummyDestinations = [
     type: 'popular',
     description: 'The City That Never Sleeps',
     rating: 4.6
+  },
+  // Adding some transport and accommodation options
+  {
+    name: 'Paris Express',
+    image: 'https://images.unsplash.com/photo-1436491865332-7a61a109cc05',
+    price: '$150',
+    type: 'train',
+    from: 'London',
+    to: 'Paris',
+    departure: '09:00',
+    arrival: '12:30',
+    operator: 'Eurostar'
+  },
+  {
+    name: 'Grand Hotel Paris',
+    image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945',
+    price: '$299',
+    type: 'hotel',
+    location: 'Paris',
+    rating: 4.5,
+    roomType: 'Deluxe Room'
   }
 ];
 
