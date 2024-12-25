@@ -14,14 +14,20 @@ const __dirname = dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-mongoose.connect('mongodb://localhost:27017/travelquester')
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/travelquester')
   .then(() => console.log('Connected to MongoDB'))
   .catch(err => console.error('MongoDB connection error:', err));
 
+// Update CORS configuration to accept requests from your deployed frontend
 app.use(cors({
-  origin: 'http://localhost:8080',
+  origin: [
+    'http://localhost:8080',
+    'https://travel-quester.vercel.app', // Update this with your actual frontend URL
+    /\.lovableproject\.com$/ // Allow all Lovable preview domains
+  ],
   credentials: true
 }));
+
 app.use(express.json());
 
 const typeDefs = readFileSync(join(__dirname, 'schema', 'schema.graphql'), 'utf-8');
@@ -45,7 +51,11 @@ const server = new ApolloServer({
 });
 
 await server.start();
-server.applyMiddleware({ app, path: '/graphql' });
+server.applyMiddleware({ 
+  app, 
+  path: '/graphql',
+  cors: false // Disable Apollo Server's CORS since we're handling it with Express
+});
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}/graphql`);
