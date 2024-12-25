@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Heart, BookMarked } from "lucide-react";
 import { Navbar } from '@/components/Navbar';
 import { useToast } from "@/hooks/use-toast";
+import { gql, useMutation } from '@apollo/client';
 
 // Dummy data for different types
 const dummyData = {
@@ -29,6 +30,29 @@ const dummyData = {
   ],
 };
 
+const CREATE_BOOKING = gql`
+  mutation CreateBooking($destinationId: ID!, $date: String!, $passengers: Int) {
+    createBooking(destinationId: $destinationId, date: $date, passengers: $passengers) {
+      id
+      destination {
+        name
+        price
+      }
+      date
+      passengers
+    }
+  }
+`;
+
+const ADD_TO_WISHLIST = gql`
+  mutation AddToWishlist($destinationId: ID!) {
+    addToWishlist(destinationId: $destinationId) {
+      id
+      name
+    }
+  }
+`;
+
 const SearchResults = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -37,28 +61,71 @@ const SearchResults = () => {
   const type = searchParams.get('type') as keyof typeof dummyData || 'flights';
   const results = dummyData[type] || [];
 
-  const handleBook = (item: any) => {
-    // Store booking in localStorage
-    const bookings = JSON.parse(localStorage.getItem('bookings') || '[]');
-    bookings.push({ ...item, type });
-    localStorage.setItem('bookings', JSON.stringify(bookings));
-    
-    toast({
-      title: "Booking Successful!",
-      description: "Your booking has been added to My Bookings.",
-    });
+  const [createBooking] = useMutation(CREATE_BOOKING);
+  const [addToWishlist] = useMutation(ADD_TO_WISHLIST);
+
+  const checkAuth = () => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to continue.",
+        variant: "destructive",
+      });
+      navigate('/auth');
+      return false;
+    }
+    return true;
   };
 
-  const handleAddToWishlist = (item: any) => {
-    // Store wishlist item in localStorage
-    const wishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
-    wishlist.push({ ...item, type });
-    localStorage.setItem('wishlist', JSON.stringify(wishlist));
+  const handleBook = async (item: any) => {
+    if (!checkAuth()) return;
     
-    toast({
-      title: "Added to Wishlist",
-      description: "Item has been added to your wishlist.",
-    });
+    try {
+      const { data } = await createBooking({
+        variables: {
+          destinationId: item.id,
+          date: new Date().toISOString(),
+          passengers: 1,
+        },
+      });
+
+      toast({
+        title: "Booking Successful!",
+        description: "Your booking has been added to My Bookings.",
+      });
+      
+      navigate('/bookings');
+    } catch (error) {
+      toast({
+        title: "Booking Failed",
+        description: error instanceof Error ? error.message : "Failed to create booking",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleAddToWishlist = async (item: any) => {
+    if (!checkAuth()) return;
+    
+    try {
+      const { data } = await addToWishlist({
+        variables: {
+          destinationId: item.id,
+        },
+      });
+
+      toast({
+        title: "Added to Wishlist",
+        description: "Item has been added to your wishlist.",
+      });
+    } catch (error) {
+      toast({
+        title: "Wishlist Update Failed",
+        description: error instanceof Error ? error.message : "Failed to update wishlist",
+        variant: "destructive",
+      });
+    }
   };
 
   const renderResult = (item: any) => {
