@@ -4,7 +4,21 @@ import { Button } from './ui/button';
 import { Card, CardContent, CardFooter, CardTitle } from './ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
-import { gql, useMutation } from '@apollo/client';
+import { gql, useMutation, useQuery } from '@apollo/client';
+
+const GET_USER_BOOKINGS = gql`
+  query GetUserBookings {
+    myBookings {
+      id
+      destination {
+        name
+        price
+      }
+      date
+      passengers
+    }
+  }
+`;
 
 const CREATE_BOOKING = gql`
   mutation CreateBooking($destinationId: ID!, $date: String!, $passengers: Int) {
@@ -28,6 +42,53 @@ const ADD_TO_WISHLIST = gql`
     }
   }
 `;
+
+const GET_USER_WISHLIST = gql`
+  query GetUserWishlist {
+    myWishlist {
+      id
+      name
+    }
+  }
+`;
+
+export const FeaturedDestinations = () => {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [wishlistItems, setWishlistItems] = useState<string[]>([]);
+  const { toast } = useToast();
+  const navigate = useNavigate();
+
+  const { data: wishlistData } = useQuery(GET_USER_WISHLIST);
+  const [createBooking] = useMutation(CREATE_BOOKING);
+  const [addToWishlist] = useMutation(ADD_TO_WISHLIST);
+
+  useEffect(() => {
+    if (wishlistData?.myWishlist) {
+      setWishlistItems(wishlistData.myWishlist.map((item: any) => item.id));
+    }
+  }, [wishlistData]);
+
+  const handlePrevious = () => {
+    setCurrentIndex((prev) => (prev === 0 ? destinations.length - 1 : prev - 1));
+  };
+
+  const handleNext = () => {
+    setCurrentIndex((prev) => (prev === destinations.length - 1 ? 0 : prev + 1));
+  };
+
+  const checkAuth = () => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to continue.",
+        variant: "destructive",
+      });
+      navigate('/auth');
+      return false;
+    }
+    return true;
+  };
 
 const destinations = [
   {
@@ -56,45 +117,6 @@ const destinations = [
   },
 ];
 
-export const FeaturedDestinations = () => {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [wishlist, setWishlist] = useState<number[]>([]);
-  const { toast } = useToast();
-  const navigate = useNavigate();
-
-  const [createBooking] = useMutation(CREATE_BOOKING);
-  const [addToWishlist] = useMutation(ADD_TO_WISHLIST);
-
-  useEffect(() => {
-    // Fetch wishlist from database instead of localStorage
-    const fetchWishlist = async () => {
-      // Implementation will depend on your GraphQL schema
-    };
-    fetchWishlist();
-  }, []);
-
-  const handlePrevious = () => {
-    setCurrentIndex((prev) => (prev === 0 ? destinations.length - 1 : prev - 1));
-  };
-
-  const handleNext = () => {
-    setCurrentIndex((prev) => (prev === destinations.length - 1 ? 0 : prev + 1));
-  };
-
-  const checkAuth = () => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      toast({
-        title: "Authentication Required",
-        description: "Please sign in to continue.",
-        variant: "destructive",
-      });
-      navigate('/auth');
-      return false;
-    }
-    return true;
-  };
-
   const handleBook = async (destination: typeof destinations[0]) => {
     if (!checkAuth()) return;
     
@@ -105,12 +127,15 @@ export const FeaturedDestinations = () => {
           date: new Date().toISOString(),
           passengers: 1,
         },
+        refetchQueries: [{ query: GET_USER_BOOKINGS }],
       });
 
       toast({
         title: "Booking Successful!",
         description: `${destination.name} has been booked successfully.`,
       });
+      
+      navigate('/bookings');
     } catch (error) {
       toast({
         title: "Booking Failed",
@@ -128,17 +153,18 @@ export const FeaturedDestinations = () => {
         variables: {
           destinationId: destination.id,
         },
+        refetchQueries: [{ query: GET_USER_WISHLIST }],
       });
 
-      setWishlist(prev => 
-        prev.includes(destination.id) 
-          ? prev.filter(id => id !== destination.id)
-          : [...prev, destination.id]
+      setWishlistItems(prevItems => 
+        prevItems.includes(destination.id.toString()) 
+          ? prevItems.filter(id => id !== destination.id.toString())
+          : [...prevItems, destination.id.toString()]
       );
 
       toast({
-        title: prev.includes(destination.id) ? "Removed from Wishlist" : "Added to Wishlist",
-        description: `${destination.name} has been ${prev.includes(destination.id) ? 'removed from' : 'added to'} your wishlist.`,
+        title: wishlistItems.includes(destination.id.toString()) ? "Removed from Wishlist" : "Added to Wishlist",
+        description: `${destination.name} has been ${wishlistItems.includes(destination.id.toString()) ? 'removed from' : 'added to'} your wishlist.`,
       });
     } catch (error) {
       toast({
@@ -175,14 +201,12 @@ export const FeaturedDestinations = () => {
                     <Button 
                       variant="outline"
                       onClick={() => toggleWishlist(destination)}
-                      className={wishlist.includes(destination.id) ? 'bg-pink-50' : ''}
+                      className={wishlistItems.includes(destination.id.toString()) ? 'bg-pink-50' : ''}
                     >
-                      <Heart className={`h-4 w-4 mr-2 ${wishlist.includes(destination.id) ? 'fill-pink-500 stroke-pink-500' : ''}`} />
-                      {wishlist.includes(destination.id) ? 'Wishlisted' : 'Add to Wishlist'}
+                      <Heart className={`h-4 w-4 mr-2 ${wishlistItems.includes(destination.id.toString()) ? 'fill-pink-500 stroke-pink-500' : ''}`} />
+                      {wishlistItems.includes(destination.id.toString()) ? 'Wishlisted' : 'Add to Wishlist'}
                     </Button>
-                    <Button 
-                      onClick={() => handleBook(destination)}
-                    >
+                    <Button onClick={() => handleBook(destination)}>
                       Book Now
                     </Button>
                   </CardFooter>
