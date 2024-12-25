@@ -58,7 +58,13 @@ export const FeaturedDestinations = () => {
   const navigate = useNavigate();
 
   const { data: wishlistData } = useQuery(GET_USER_WISHLIST);
-  const [createBooking] = useMutation(CREATE_BOOKING);
+  const [createBooking] = useMutation(CREATE_BOOKING, {
+    context: {
+      headers: {
+        authorization: `Bearer ${localStorage.getItem('token')}`
+      }
+    }
+  });
   const [addToWishlist] = useMutation(ADD_TO_WISHLIST);
 
   useEffect(() => {
@@ -69,25 +75,25 @@ export const FeaturedDestinations = () => {
 
   const destinations = [
     {
-      id: "1",
+      id: "64f5b7d42c7cf9f704f9d3e1", // Use actual MongoDB ObjectIds here
       name: 'Paris, France',
       image: 'https://images.unsplash.com/photo-1472396961693-142e6e269027',
       price: '$599',
     },
     {
-      id: "2",
+      id: "64f5b7d42c7cf9f704f9d3e2",
       name: 'Bali, Indonesia',
       image: 'https://images.unsplash.com/photo-1433086966358-54859d0ed716',
       price: '$799',
     },
     {
-      id: "3",
+      id: "64f5b7d42c7cf9f704f9d3e3",
       name: 'Tokyo, Japan',
       image: 'https://images.unsplash.com/photo-1465146344425-f00d5f5c8f07',
       price: '$899',
     },
     {
-      id: "4",
+      id: "64f5b7d42c7cf9f704f9d3e4",
       name: 'New York, USA',
       image: 'https://images.unsplash.com/photo-1482938289607-e9573fc25ebb',
       price: '$699',
@@ -121,13 +127,15 @@ export const FeaturedDestinations = () => {
         refetchQueries: [{ query: GET_USER_BOOKINGS }],
       });
 
-      toast({
-        title: "Booking Successful!",
-        description: `${destination.name} has been booked successfully.`,
-      });
-      
-      navigate('/bookings');
+      if (data?.createBooking) {
+        toast({
+          title: "Booking Successful!",
+          description: `${destination.name} has been booked successfully.`,
+        });
+        navigate('/bookings');
+      }
     } catch (error) {
+      console.error('Booking error:', error);
       toast({
         title: "Booking Failed",
         description: error instanceof Error ? error.message : "Failed to create booking",

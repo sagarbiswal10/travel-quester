@@ -4,6 +4,7 @@ import bcrypt from 'bcryptjs';
 import User from '../models/User.js';
 import Destination from '../models/Destination.js';
 import Booking from '../models/Booking.js';
+import mongoose from 'mongoose';
 
 const resolvers = {
   Query: {
@@ -30,6 +31,40 @@ const resolvers = {
     },
   },
   Mutation: {
+    createBooking: async (_, { destinationId, date, returnDate, passengers, roomType }, { user }) => {
+      if (!user) throw new AuthenticationError('You must be logged in');
+
+      try {
+        // Validate ObjectId
+        if (!mongoose.Types.ObjectId.isValid(destinationId)) {
+          throw new Error('Invalid destination ID');
+        }
+
+        const booking = new Booking({
+          user: user.id,
+          destination: destinationId,
+          date,
+          returnDate,
+          passengers,
+          roomType,
+          status: 'pending',
+          paymentStatus: 'pending'
+        });
+
+        await booking.save();
+        
+        // Add booking to user's bookings array
+        await User.findByIdAndUpdate(
+          user.id,
+          { $push: { bookings: booking._id } }
+        );
+
+        return await Booking.findById(booking._id).populate('destination');
+      } catch (error) {
+        console.error('Booking creation error:', error);
+        throw new Error('Failed to create booking: ' + error.message);
+      }
+    },
     login: async (_, { email, password }) => {
       const user = await User.findOne({ email });
       if (!user) throw new AuthenticationError('Invalid credentials');
@@ -68,28 +103,6 @@ const resolvers = {
         { $pull: { wishlist: destinationId } }
       );
       return await Destination.findById(destinationId);
-    },
-    createBooking: async (_, { destinationId, date, returnDate, passengers, roomType }, { user }) => {
-      if (!user) throw new AuthenticationError('You must be logged in');
-
-      const booking = new Booking({
-        user: user.id,
-        destination: destinationId,
-        date,
-        returnDate,
-        passengers,
-        roomType,
-        status: 'pending',
-        paymentStatus: 'pending'
-      });
-
-      await booking.save();
-      await User.findByIdAndUpdate(
-        user.id,
-        { $push: { bookings: booking.id } }
-      );
-
-      return await Booking.findById(booking.id).populate('destination');
     },
   },
 };
