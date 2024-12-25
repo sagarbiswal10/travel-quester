@@ -75,7 +75,7 @@ export const FeaturedDestinations = () => {
 
   const destinations = [
     {
-      id: "64f5b7d42c7cf9f704f9d3e1", // Use actual MongoDB ObjectIds here
+      id: "64f5b7d42c7cf9f704f9d3e1",
       name: 'Paris, France',
       image: 'https://images.unsplash.com/photo-1472396961693-142e6e269027',
       price: '$599',
@@ -124,7 +124,6 @@ export const FeaturedDestinations = () => {
           date: new Date().toISOString(),
           passengers: 1,
         },
-        refetchQueries: [{ query: GET_USER_BOOKINGS }],
       });
 
       if (data?.createBooking) {

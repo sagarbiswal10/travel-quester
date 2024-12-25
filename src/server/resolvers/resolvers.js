@@ -22,11 +22,11 @@ const resolvers = {
     },
     myBookings: async (_, __, { user }) => {
       if (!user) throw new AuthenticationError('You must be logged in');
-      return await Booking.find({ user: user.id }).populate('destination');
+      return await Booking.find({ user: user.userId }).populate('destination');
     },
     myWishlist: async (_, __, { user }) => {
       if (!user) throw new AuthenticationError('You must be logged in');
-      const userData = await User.findById(user.id).populate('wishlist');
+      const userData = await User.findById(user.userId).populate('wishlist');
       return userData.wishlist;
     },
   },
@@ -35,13 +35,12 @@ const resolvers = {
       if (!user) throw new AuthenticationError('You must be logged in');
 
       try {
-        // Validate ObjectId
         if (!mongoose.Types.ObjectId.isValid(destinationId)) {
           throw new Error('Invalid destination ID');
         }
 
         const booking = new Booking({
-          user: user.id,
+          user: user.userId,
           destination: destinationId,
           date,
           returnDate,
@@ -53,9 +52,8 @@ const resolvers = {
 
         await booking.save();
         
-        // Add booking to user's bookings array
         await User.findByIdAndUpdate(
-          user.id,
+          user.userId,
           { $push: { bookings: booking._id } }
         );
 
@@ -72,7 +70,7 @@ const resolvers = {
       const valid = await bcrypt.compare(password, user.password);
       if (!valid) throw new AuthenticationError('Invalid credentials');
 
-      const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET);
+      const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET || 'your-secret-key');
       return { token, user };
     },
     register: async (_, { name, email, password }) => {
@@ -83,14 +81,14 @@ const resolvers = {
       const user = new User({ name, email, password: hashedPassword });
       await user.save();
 
-      const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET);
+      const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET || 'your-secret-key');
       return { token, user };
     },
     addToWishlist: async (_, { destinationId }, { user }) => {
       if (!user) throw new AuthenticationError('You must be logged in');
       
       await User.findByIdAndUpdate(
-        user.id,
+        user.userId,
         { $addToSet: { wishlist: destinationId } }
       );
       return await Destination.findById(destinationId);
@@ -99,7 +97,7 @@ const resolvers = {
       if (!user) throw new AuthenticationError('You must be logged in');
       
       await User.findByIdAndUpdate(
-        user.id,
+        user.userId,
         { $pull: { wishlist: destinationId } }
       );
       return await Destination.findById(destinationId);

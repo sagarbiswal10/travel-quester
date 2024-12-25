@@ -14,33 +14,33 @@ const __dirname = dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// MongoDB connection
 mongoose.connect('mongodb://localhost:27017/travelquester')
   .then(() => console.log('Connected to MongoDB'))
   .catch(err => console.error('MongoDB connection error:', err));
 
-// Middleware
 app.use(cors({
   origin: 'http://localhost:8080',
   credentials: true
 }));
 app.use(express.json());
 
-// Read schema - fixing the path
 const typeDefs = readFileSync(join(__dirname, 'schema', 'schema.graphql'), 'utf-8');
 
-// Create Apollo Server
 const server = new ApolloServer({
   typeDefs,
   resolvers,
   context: ({ req }) => {
     const token = req.headers.authorization || '';
     try {
-      const user = jwt.verify(token.replace('Bearer ', ''), process.env.JWT_SECRET || 'your-secret-key');
-      return { user };
+      if (token) {
+        const cleanToken = token.replace('Bearer ', '');
+        const decoded = jwt.verify(cleanToken, process.env.JWT_SECRET || 'your-secret-key');
+        return { user: decoded };
+      }
     } catch (err) {
-      return { user: null };
+      console.error('Token verification error:', err);
     }
+    return { user: null };
   },
 });
 
